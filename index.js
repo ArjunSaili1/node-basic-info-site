@@ -1,28 +1,17 @@
-import { createServer } from 'http';
-import { readFile as _readFile } from 'fs/promises';
+const express = require('express');
+const path = require('path')
+const app = express();
+const PORT = process.env.PORT || 9999;
+app.listen(PORT);
 
-const server = createServer((req, res)=>{
-    res.setHeader('Content-Type', 'text/html')
-    readFile(req.url).then(({code, file})=>{
-        res.statusCode = code
-        res.end(file)
-    })
-}).listen(8080)
-
-async function readFile(path){
-    try{
-        let file;
-        if(path === "/"){
-            file = await _readFile("./index.html", {encoding: "utf8"})
-        }
-        else{
-            file = await _readFile(`.${path}.html`, {encoding: "utf8"})
-        }
-        return {file: file, code: 200}
+app.get('*', function(req, res){
+    if(req.url == "/"){
+        res.sendFile(path.join(__dirname, '/index.html'))
     }
-    catch (err){
-        console.log(err)
-        const unknownPageFile = await _readFile("./404.html", {encoding: "utf8"})
-        return {file: unknownPageFile, code: 404};
+    if(req.url == "/about" || req.url == "/contact-me"){
+        res.sendFile(path.join(__dirname, `${req.url}.html`))
     }
-}
+    else{
+        res.sendFile(path.join(__dirname, '/404.html'))
+    }
+})
